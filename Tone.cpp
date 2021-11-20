@@ -37,6 +37,10 @@
 ||
 */
 
+/*
+  add ATMeaga2560(has 6 timers)
+*/
+
 #if defined(WIRING)
  #include <Wiring.h>
 #elif ARDUINO >= 100
@@ -77,7 +81,7 @@ volatile int32_t timer2_toggle_count;
 volatile uint8_t *timer2_pin_port;
 volatile uint8_t timer2_pin_mask;
 
-#if defined(__AVR_ATmega1280__)
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 volatile int32_t timer3_toggle_count;
 volatile uint8_t *timer3_pin_port;
 volatile uint8_t timer3_pin_mask;
@@ -90,7 +94,7 @@ volatile uint8_t timer5_pin_mask;
 #endif
 
 
-#if defined(__AVR_ATmega1280__)
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
 #define AVAILABLE_TONE_PINS 6
 
@@ -186,13 +190,13 @@ ISR(TIMER2_COMPA_vect)
     TIMSK2 &= ~(1 << OCIE2A);                 // disable the interrupt
     *timer2_pin_port &= ~(timer2_pin_mask);   // keep pin low after stop
   }
-  
+
   timer2_toggle_count = temp_toggle_count;
 }
 
 
 
-#if defined(__AVR_ATmega1280__)
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
 #ifdef WIRING
 void Tone_Timer3_Interrupt(void)
@@ -314,7 +318,7 @@ void Tone::begin(uint8_t tonePin)
 #endif
       break;
 
-#if defined(__AVR_ATmega1280__)
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
       case 3:
         // 16 bit timer
         TCCR3A = 0;
@@ -375,7 +379,7 @@ void Tone::play(uint16_t frequency, uint32_t duration)
   {
     // Set the pinMode as OUTPUT
     pinMode(_pin, OUTPUT);
-    
+
     // if we are using an 8 bit timer, scan through prescalars to find the best fit
     if (_timer == 0 || _timer == 2)
     {
@@ -438,7 +442,7 @@ void Tone::play(uint16_t frequency, uint32_t duration)
 
       if (_timer == 1)
         TCCR1B = (TCCR1B & 0b11111000) | prescalarbits;
-#if defined(__AVR_ATmega1280__)
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
       else if (_timer == 3)
         TCCR3B = (TCCR3B & 0b11111000) | prescalarbits;
       else if (_timer == 4)
@@ -448,7 +452,7 @@ void Tone::play(uint16_t frequency, uint32_t duration)
 #endif
 
     }
-    
+
 
     // Calculate the toggle count
     if (duration > 0)
@@ -485,7 +489,7 @@ void Tone::play(uint16_t frequency, uint32_t duration)
         bitWrite(TIMSK2, OCIE2A, 1);
         break;
 
-#if defined(__AVR_ATmega1280__)
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
       case 3:
         OCR3A = ocr;
         timer3_toggle_count = toggle_count;
@@ -524,7 +528,7 @@ void Tone::stop()
       TIMSK2 &= ~(1 << OCIE2A);
       break;
 
-#if defined(__AVR_ATmega1280__)
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
     case 3:
       TIMSK3 &= ~(1 << OCIE3A);
       break;
@@ -544,7 +548,7 @@ void Tone::stop()
 bool Tone::isPlaying(void)
 {
   bool returnvalue = false;
-  
+
   switch (_timer)
   {
 #if !defined(__AVR_ATmega8__)
@@ -560,7 +564,7 @@ bool Tone::isPlaying(void)
       returnvalue = (TIMSK2 & (1 << OCIE2A));
       break;
 
-#if defined(__AVR_ATmega1280__)
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
     case 3:
       returnvalue = (TIMSK3 & (1 << OCIE3A));
       break;
